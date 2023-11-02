@@ -79,3 +79,13 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
+
+VolumeMaterial::VolumeMaterial()
+{
+	color = vec4(1.f, 1.f, 1.f, 1.f);
+	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
+}
+
+VolumeMaterial::~VolumeMaterial() {
+
+}

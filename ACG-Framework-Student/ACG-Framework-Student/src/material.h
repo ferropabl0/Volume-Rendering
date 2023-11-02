@@ -41,4 +41,15 @@ public:
 
 // TODO: Derived class VolumeMaterial
 
+
+class VolumeMaterial : public StandardMaterial
+{
+public:
+	VolumeMaterial();
+	~VolumeMaterial();
+
+};
+
+
+
 #endif

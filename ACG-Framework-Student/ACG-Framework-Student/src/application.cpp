@@ -54,7 +54,20 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node_list.push_back(node);
 
 		// TODO: create all the volumes to use in the app
-		// ...
+		Volume* teapot = new Volume();
+		teapot->loadPNG("data/volumes/teapot_16_16.png",16,16);
+		Volume* bonsai = new Volume();
+		bonsai->loadPNG("data/volumes/bonsai_16_16.png",16,16);
+		Volume* CT_abdomen = new Volume();
+		CT_abdomen->loadPVM("data/volumes/CT_abdomen.pvm");
+		Volume* daisy = new Volume();
+		daisy->loadPVM("data/volumes/daisy.pvm");
+		Volume* orange = new Volume();
+		orange->loadPVM("data/volumes/orange.pvm");
+		Texture orange_txt = Texture();
+		orange_txt.create3DFromVolume(orange);
+		Mesh aux_mesh = Mesh();
+		aux_mesh.createCube();
 	}
 	
 	//hide the cursor
