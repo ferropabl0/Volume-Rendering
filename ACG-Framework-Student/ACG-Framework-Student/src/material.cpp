@@ -80,8 +80,8 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 	}
 }
 
-VolumeMaterial::VolumeMaterial()
-{
+VolumeMaterial::VolumeMaterial(Shader* shader, Texture* texture)		// we need a texture and a shader already defined, so that we don't do it for every vertex
+{																		// set uniforms also step function
 	color = vec4(1.f, 1.f, 1.f, 1.f);
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
 }

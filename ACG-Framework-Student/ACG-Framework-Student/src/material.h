@@ -45,7 +45,7 @@ public:
 class VolumeMaterial : public StandardMaterial
 {
 public:
-	VolumeMaterial();
+	VolumeMaterial(Shader* shader, Texture* texture);
 	~VolumeMaterial();
 
 };

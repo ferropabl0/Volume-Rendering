@@ -45,7 +45,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		// EXAMPLE OF HOW TO CREATE A SCENE NODE
-		SceneNode* node = new SceneNode("Visible node");
+		/*SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		node->model.scale(1, 1, 1);
 		StandardMaterial* mat = new StandardMaterial();
@@ -61,13 +61,24 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Volume* CT_abdomen = new Volume();
 		CT_abdomen->loadPVM("data/volumes/CT_abdomen.pvm");
 		Volume* daisy = new Volume();
-		daisy->loadPVM("data/volumes/daisy.pvm");
+		daisy->loadPVM("data/volumes/daisy.pvm");*/
+
+
 		Volume* orange = new Volume();
 		orange->loadPVM("data/volumes/orange.pvm");
-		Texture orange_txt = Texture();
-		orange_txt.create3DFromVolume(orange);
-		Mesh aux_mesh = Mesh();
-		aux_mesh.createCube();
+		Texture* orange_txt = new Texture();
+		orange_txt->create3DFromVolume(orange);
+		Mesh* aux_mesh = new Mesh();
+		aux_mesh->createCube();
+
+		SceneNode* node = new SceneNode();
+		node->mesh = aux_mesh;
+		node->model.scale(1.0, (orange->height * orange->heightSpacing)/(orange->width * orange->widthSpacing), (orange->depth * orange->depthSpacing) / (orange->width * orange->widthSpacing));
+		StandardMaterial* mat = new StandardMaterial();
+		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+		mat->texture = orange_txt;
+		node->material = mat;
+		node_list.push_back(node);
 	}
 	
 	//hide the cursor
