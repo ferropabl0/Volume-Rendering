@@ -53,14 +53,29 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/normal.fs");
 		node_list.push_back(node);*/
 
+		Shader* shader = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+
+		Volume* foot = new Volume();
+		foot->loadPNG("data/volumes/foot_16_16.png");
+		Texture* foot_txt = new Texture();
+		foot_txt->create3DFromVolume(foot);
+
+		Volume* bonsai = new Volume();
+		bonsai->loadPNG("data/volumes/bonsai_16_16.png");
+		Texture* bonsai_txt = new Texture();
+		bonsai_txt->create3DFromVolume(bonsai);
+		
 		Volume* orange = new Volume();
 		orange->loadPVM("data/volumes/orange.pvm");
-		Shader* shader = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 		Texture* orange_txt = new Texture();
 		orange_txt->create3DFromVolume(orange);
-		VolumeNode* node = new VolumeNode(shader, orange_txt);
-		node->model.scale(1.0, (orange->height * orange->heightSpacing) / (orange->width * orange->widthSpacing), (orange->depth * orange->depthSpacing) / (orange->width * orange->widthSpacing));
-		node_list.push_back(node);
+		Matrix44 model0, model1, model2;
+		model0.scale(1.0, (foot->height * foot->heightSpacing) / (foot->width * foot->widthSpacing), (foot->depth * foot->depthSpacing) / (foot->width * foot->widthSpacing));
+		model1.scale(1.0, (bonsai->height * bonsai->heightSpacing) / (bonsai->width * bonsai->widthSpacing), (bonsai->depth * bonsai->depthSpacing) / (bonsai->width * bonsai->widthSpacing));
+		model2.scale(1.0, (orange->height * orange->heightSpacing) / (orange->width * orange->widthSpacing), (orange->depth * orange->depthSpacing) / (orange->width * orange->widthSpacing));
+		VolumeNode* node1 = new VolumeNode(shader, foot_txt, bonsai_txt, orange_txt, model0, model1, model2, 1);
+		node_list.push_back(node1);
+	
 	
 	}
 	

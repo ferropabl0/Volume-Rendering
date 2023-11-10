@@ -43,6 +43,7 @@ public:
 
 class VolumeMaterial : public StandardMaterial
 {
+	float step_length, brightness;
 public:
 	VolumeMaterial(Shader* shader, Texture* texture);
 	~VolumeMaterial();

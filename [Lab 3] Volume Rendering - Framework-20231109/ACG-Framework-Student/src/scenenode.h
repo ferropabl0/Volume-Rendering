@@ -33,10 +33,14 @@ public:
 // TODO: Derived class VolumeNode
 
 class VolumeNode : public SceneNode
-{
+{	
+	Material* mat0, * mat1, * mat2;
+	Matrix44 mod0, mod1, mod2;
+	int index;
 public:
-	VolumeNode(Shader* shader, Texture* texture);
+	VolumeNode(Shader* shader, Texture* text0, Texture* text1, Texture* text2, Matrix44 mod0_, Matrix44 mod1_, Matrix44 mod2_, int index_);
 	void render(Camera* camera);
+	void renderInMenu();
 
 };
 

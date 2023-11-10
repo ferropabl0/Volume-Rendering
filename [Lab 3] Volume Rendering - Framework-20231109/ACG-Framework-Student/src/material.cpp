@@ -86,6 +86,8 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 VolumeMaterial::VolumeMaterial(Shader* shader_, Texture* texture_)		// we need a texture and a shader already defined, so that we don't do it for every vertex
 {																		// set uniforms also step function
 	color = vec4(1.f, 1.f, 1.f, 1.f);
+	step_length = 0.2;
+	brightness = 10.0;
 	shader = shader_;
 	texture = texture_;
 
@@ -99,7 +101,6 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	//upload node uniforms
 	Matrix44 invModel = model;
-	float step_length = 0.1;
 	invModel.inverse();
 	shader->setUniform("u_inverse_model", invModel);
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
@@ -108,15 +109,18 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_time", Application::instance->time);
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_step_length", step_length);
+	shader->setUniform("u_brightness", brightness);
 
-	if (texture)
+	if (texture) {
 		shader->setUniform("u_texture", texture);
+	}
 }
 
 void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
 	if (mesh && shader)
 	{
+		glEnable(GL_BLEND);
 		//enable shader
 		shader->enable();
 
@@ -128,10 +132,14 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 		//disable shader
 		shader->disable();
+
+		glDisable(GL_BLEND);
 	}
 }
 
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::ColorEdit3("Color", (float*)&color); // Edit 3 floats representing a color
+	ImGui::SliderFloat("Step Length", &step_length, 0.0, 1.0);
+	ImGui::SliderFloat("Brightness", &brightness, 0.0, 50.0);
 }
