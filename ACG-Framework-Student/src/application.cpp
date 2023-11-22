@@ -57,6 +57,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* bonsai_txt = new Texture();
 		bonsai_txt->create3DFromVolume(bonsai);
 
+		Volume* teapot = new Volume();
+		teapot->loadPNG("data/volumes/teapot_16_16.png");
+		Texture* teapot_txt = new Texture();
+		teapot_txt->create3DFromVolume(teapot);
+
 		Volume* abdomen = new Volume();
 		abdomen->loadPVM("data/volumes/CT-Abdomen.pvm");
 		Texture* abdomen_txt = new Texture();
@@ -66,20 +71,36 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		orange->loadPVM("data/volumes/orange.pvm");
 		Texture* orange_txt = new Texture();
 		orange_txt->create3DFromVolume(orange);
-		Matrix44 model0, model1, model2, model3;
+
+		Volume* daisy = new Volume();
+		daisy->loadPVM("data/volumes/Daisy.pvm");
+		Texture* daisy_txt = new Texture();
+		daisy_txt->create3DFromVolume(daisy);
+
+		Texture* textures[6] = { foot_txt, bonsai_txt, teapot_txt, abdomen_txt, orange_txt, daisy_txt };
+
+		Matrix44 model0, model1, model2, model3, model4, model5;
 		model0.scale(1.0, (foot->height * foot->heightSpacing) / (foot->width * foot->widthSpacing), (foot->depth * foot->depthSpacing) / (foot->width * foot->widthSpacing));
 		model1.scale(1.0, (bonsai->height * bonsai->heightSpacing) / (bonsai->width * bonsai->widthSpacing), (bonsai->depth * bonsai->depthSpacing) / (bonsai->width * bonsai->widthSpacing));
-		model2.scale(1.0, (orange->height * orange->heightSpacing) / (orange->width * orange->widthSpacing), (orange->depth * orange->depthSpacing) / (orange->width * orange->widthSpacing));
+		model2.scale(1.0, (teapot->height * teapot->heightSpacing) / (teapot->width * teapot->widthSpacing), (teapot->depth * teapot->depthSpacing) / (teapot->width * teapot->widthSpacing));
 		model3.scale(1.0, (abdomen->height * abdomen->heightSpacing) / (abdomen->width * abdomen->widthSpacing), (abdomen->depth * abdomen->depthSpacing) / (abdomen->width * abdomen->widthSpacing));
+		model4.scale(1.0, (orange->height * orange->heightSpacing) / (orange->width * orange->widthSpacing), (orange->depth * orange->depthSpacing) / (orange->width * orange->widthSpacing));
+		model5.scale(1.0, (daisy->height * daisy->heightSpacing) / (daisy->width * daisy->widthSpacing), (daisy->depth * daisy->depthSpacing) / (daisy->width * daisy->widthSpacing));
+
+		Matrix44 models[6] = {model0, model1, model2, model3, model4, model5};
 
 		Image* blue_noise = new Image();
 		blue_noise->loadPNG("data/images/blueNoise.png");
 		Texture* blue_noise_text = new Texture(blue_noise);
 
+
 		Texture* transfer_function_text = new Texture();
 		transfer_function_text->load("data/images/prueba.png", true, GL_CLAMP_TO_EDGE);
+		
+		Texture* transfers[12];
+		transfers[0] = transfer_function_text;
 
-		VolumeNode* node1 = new VolumeNode(shader, foot_txt, bonsai_txt, orange_txt, abdomen_txt, model0, model1, model2, model3, 0, blue_noise_text, transfer_function_text);
+		VolumeNode* node1 = new VolumeNode(shader, textures, models, blue_noise_text, transfers);
 		node_list.push_back(node1);
 	
 	}

@@ -57,37 +57,20 @@ void SceneNode::renderInMenu()
 	}
 }
 
-VolumeNode::VolumeNode(Shader* shader, Texture* text0, Texture* text1, Texture* text2, Texture* text3, Matrix44 mod0_, Matrix44 mod1_, Matrix44 mod2_, Matrix44 mod3_, int index_, Texture* noise_, Texture* transfer_function_)
+VolumeNode::VolumeNode(Shader* shader, Texture* texts_[6], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[12])
 {
 	Mesh* aux_mesh = new Mesh();
 	aux_mesh->createCube();
 	mesh = aux_mesh;
-	index = index_;
-	mat0 = new VolumeMaterial(shader, text0, noise_, transfer_function_);
-	mat1 = new VolumeMaterial(shader, text1, noise_, transfer_function_);
-	mat2 = new VolumeMaterial(shader, text2, noise_, transfer_function_);
-	mat3 = new VolumeMaterial(shader, text3, noise_, transfer_function_);
-	mod0 = mod0_;
-	mod1 = mod1_;
-	mod2 = mod2_;
-	mod3 = mod3_;
+	index = 0;
+	
+	for (int i = 0; i < 6; i++) {
+		mats[i] = new VolumeMaterial(shader, texts_[i], noise_, transfers_[0]);
+		mods[i] = mods_[i];
+	}
 
-	if (index == 0) {
-		material = mat0;
-		model = mod0;
-	}
-	else if (index == 1) {
-		material = mat1;
-		model = mod1;
-	}
-	else if (index == 2) {
-		material = mat2;
-		model = mod2;
-	}
-	else if (index == 3) {
-		material = mat3;
-		model = mod3;
-	}
+	material = mats[index];
+	model = mods[index];
 }
 
 void VolumeNode::renderInMenu()
@@ -108,23 +91,10 @@ void VolumeNode::renderInMenu()
 	//Material
 	if (material && ImGui::TreeNode("Material"))
 	{
-		if (ImGui::Combo("Volume", &index, "Foot\0Bonsai\0Orange\0Abdomen")) {
-			if (index == 0) {
-				material = mat0;
-				model = mod0;
-			}
-			else if (index == 1) {
-				material = mat1;
-				model = mod1;
-			}
-			else if (index == 2) {
-				material = mat2;
-				model = mod2;
-			}
-			else if (index == 3) {
-				material = mat3;
-				model = mod3;
-			}
+		if (ImGui::Combo("Volume", &index, "Foot\0Bonsai\0Teapot\0Abdomen\0Orange\0Daisy")) {
+			material = mats[index];
+			model = mods[index];
+			std::cout << sizeof(mods);
 		}
 
 		material->renderInMenu();

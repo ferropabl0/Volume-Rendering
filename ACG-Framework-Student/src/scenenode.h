@@ -34,11 +34,13 @@ public:
 
 class VolumeNode : public SceneNode
 {	
-	VolumeMaterial* mat0, * mat1, * mat2, * mat3;
-	Matrix44 mod0, mod1, mod2, mod3;
+
+	VolumeMaterial* mats[6];
+	Matrix44 mods[6];
 	int index;
+
 public:
-	VolumeNode(Shader* shader, Texture* text0, Texture* text1, Texture* text2, Texture* text3, Matrix44 mod0_, Matrix44 mod1_, Matrix44 mod2_, Matrix44 mod3_, int index_, Texture* noise_, Texture* transfer_function_);
+	VolumeNode(Shader* shader, Texture* texts_[6], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[12]);
 	void renderInMenu();
 
 };

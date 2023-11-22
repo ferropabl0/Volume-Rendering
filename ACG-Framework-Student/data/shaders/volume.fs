@@ -23,14 +23,14 @@ void main() {
     float d, offset;
 	vec2 noise_coords = gl_FragCoord.xy/128.0;
 
-	if (u_jittering_mode == 1) {
+	/*if (u_jittering_mode == 1) {
 		offset = texture2D(u_noise_txt, noise_coords).z;	
 	} else if (u_jittering_mode == 2) {
 		offset = rand(gl_FragCoord.xy);
 	} else if (u_jittering_mode == 0) {
 		offset = 0;
-	}
-	offset = rand(gl_FragCoord.xy);
+	}*/
+	offset = 0;
 	vec3 dir = normalize(v_position.xyz - u_camera_position.xyz);
 	vec3 sample_pos = v_position.xyz + offset*dir;
 	vec3 step_vec = dir*u_step_length;
