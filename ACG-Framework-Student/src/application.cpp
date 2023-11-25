@@ -45,7 +45,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 
-		Shader* shader = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+		Shader* shaders[2];
+		shaders[0] = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+		shaders[1] = Shader::Get("data/shaders/basic.vs", "data/shaders/isosurfaces.fs");
 
 		Volume* foot = new Volume();
 		foot->loadPNG("data/volumes/foot_16_16.png");
@@ -88,19 +90,25 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		model5.scale(1.0, (daisy->height * daisy->heightSpacing) / (daisy->width * daisy->widthSpacing), (daisy->depth * daisy->depthSpacing) / (daisy->width * daisy->widthSpacing));
 
 		Matrix44 models[6] = {model0, model1, model2, model3, model4, model5};
+		Mesh* aux_mesh = new Mesh();
+		aux_mesh->createCube();
 
 		Image* blue_noise = new Image();
 		blue_noise->loadPNG("data/images/blueNoise.png");
 		Texture* blue_noise_text = new Texture(blue_noise);
 
+		Texture* bonsai_t1 = new Texture();
+		bonsai_t1->load("data/images/bonsai_t1.png", true, GL_CLAMP_TO_EDGE);
 
-		Texture* transfer_function_text = new Texture();
-		transfer_function_text->load("data/images/prueba.png", true, GL_CLAMP_TO_EDGE);
-		
-		Texture* transfers[12];
-		transfers[0] = transfer_function_text;
+		Texture* abdomen_t1 = new Texture();
+		abdomen_t1->load("data/images/abdomen_t1.png", true, GL_CLAMP_TO_EDGE);
 
-		VolumeNode* node1 = new VolumeNode(shader, textures, models, blue_noise_text, transfers);
+		Texture* transfers[6];
+		transfers[1] = bonsai_t1;
+		transfers[3] = abdomen_t1;
+
+
+		VolumeNode* node1 = new VolumeNode(shaders, textures, models, blue_noise_text, transfers, aux_mesh, true);
 		node_list.push_back(node1);
 	
 	}
@@ -246,7 +254,7 @@ void Application::onFileChanged(const char* filename)
 void Application::renderInMenu() {
 
 	if (ImGui::TreeNode("Scene")) {
-		//
+	
 		ImGui::TreePop();
 	}
 

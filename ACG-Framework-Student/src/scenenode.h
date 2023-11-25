@@ -30,8 +30,6 @@ public:
 	virtual void renderInMenu();
 };
 
-// TODO: Derived class VolumeNode
-
 class VolumeNode : public SceneNode
 {	
 
@@ -40,7 +38,7 @@ class VolumeNode : public SceneNode
 	int index;
 
 public:
-	VolumeNode(Shader* shader, Texture* texts_[6], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[12]);
+	VolumeNode(Shader* shader[2], Texture* texts_[6], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[6], Mesh* aux_mesh_, bool isosurf);
 	void renderInMenu();
 
 };

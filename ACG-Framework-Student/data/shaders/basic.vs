@@ -9,6 +9,7 @@ uniform float u_step_length;
 uniform vec4 u_color;
 uniform mat4 u_model;
 uniform mat4 u_viewprojection;
+uniform int u_jittering_mode;
 
 //this will store the color for the pixel shader
 varying vec3 v_position;

@@ -44,16 +44,30 @@ public:
 class VolumeMaterial : public StandardMaterial
 {
 public:
-	float step_length, brightness;
-	int jit_mode;
+	float step_length, brightness, d_threshold;
+	int jit_idx;
+	bool jit_text, jit_rand, clipping1, clipping2, transfer;
+	float clip_plane[4];
 	Texture* noise;
 	Texture* transfer_function;
+	VolumeMaterial();
 	VolumeMaterial(Shader* shader_, Texture* texture_, Texture* noise_, Texture* transfer_function_);
 	~VolumeMaterial();
 	void setUniforms(Camera* camera, Matrix44 model);
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void VolumeMaterial::renderInMenu();
 
+};
+
+class IsosurfaceMaterial : public VolumeMaterial
+{
+public:
+	float h;
+	float light_pos[3];
+	IsosurfaceMaterial(Shader* shader_, Texture* texture_);
+	~IsosurfaceMaterial();
+	void setUniforms(Camera* camera, Matrix44 model);
+	void IsosurfaceMaterial::renderInMenu();
 };
 
 #endif
