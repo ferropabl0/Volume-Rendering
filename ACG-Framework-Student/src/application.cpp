@@ -44,11 +44,12 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f, window_width/(float)window_height, 0.1f, 10000.f); //set the projection, we want to be perspective
 
 	{
-
+		// SHADERS
 		Shader* shaders[2];
 		shaders[0] = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 		shaders[1] = Shader::Get("data/shaders/basic.vs", "data/shaders/isosurfaces.fs");
 
+		// VOLUMES & TEXTURES
 		Volume* foot = new Volume();
 		foot->loadPNG("data/volumes/foot_16_16.png");
 		Texture* foot_txt = new Texture();
@@ -81,6 +82,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		Texture* textures[6] = { foot_txt, bonsai_txt, teapot_txt, abdomen_txt, orange_txt, daisy_txt };
 
+		// MODEL MATRICES
 		Matrix44 model0, model1, model2, model3, model4, model5;
 		model0.scale(1.0, (foot->height * foot->heightSpacing) / (foot->width * foot->widthSpacing), (foot->depth * foot->depthSpacing) / (foot->width * foot->widthSpacing));
 		model1.scale(1.0, (bonsai->height * bonsai->heightSpacing) / (bonsai->width * bonsai->widthSpacing), (bonsai->depth * bonsai->depthSpacing) / (bonsai->width * bonsai->widthSpacing));
@@ -90,25 +92,40 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		model5.scale(1.0, (daisy->height * daisy->heightSpacing) / (daisy->width * daisy->widthSpacing), (daisy->depth * daisy->depthSpacing) / (daisy->width * daisy->widthSpacing));
 
 		Matrix44 models[6] = {model0, model1, model2, model3, model4, model5};
+
+		// AUXILIARY MESH
 		Mesh* aux_mesh = new Mesh();
 		aux_mesh->createCube();
 
+		// BLUE NOISE
 		Image* blue_noise = new Image();
 		blue_noise->loadPNG("data/images/blueNoise.png");
 		Texture* blue_noise_text = new Texture(blue_noise);
 
+		// TRANSFER TEXTURES
+		Texture* foot_t1 = new Texture();
+		foot_t1->load("data/images/foot_t1.png", true, GL_CLAMP_TO_EDGE);
+
 		Texture* bonsai_t1 = new Texture();
 		bonsai_t1->load("data/images/bonsai_t1.png", true, GL_CLAMP_TO_EDGE);
+
+		Texture* teapot_t1 = new Texture();
+		teapot_t1->load("data/images/teapot_t1.png", true, GL_CLAMP_TO_EDGE);
 
 		Texture* abdomen_t1 = new Texture();
 		abdomen_t1->load("data/images/abdomen_t1.png", true, GL_CLAMP_TO_EDGE);
 
+
 		Texture* transfers[6];
+		transfers[0] = foot_t1;
 		transfers[1] = bonsai_t1;
+		transfers[2] = teapot_t1;
 		transfers[3] = abdomen_t1;
 
+		// ISOSURFACE ON-OFF
+		bool isosurface = false;
 
-		VolumeNode* node1 = new VolumeNode(shaders, textures, models, blue_noise_text, transfers, aux_mesh, true);
+		VolumeNode* node1 = new VolumeNode(shaders, textures, models, blue_noise_text, transfers, aux_mesh, isosurface);
 		node_list.push_back(node1);
 	
 	}

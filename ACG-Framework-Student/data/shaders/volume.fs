@@ -19,6 +19,7 @@ varying vec3 v_normal;
 varying vec2 v_uv;
 varying vec4 v_color;
 
+// Funció pseudo-random per Jittering
 float rand(vec2 co) {
 	return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -26,63 +27,105 @@ float rand(vec2 co) {
 void main() {
 
     float d, offset;
-	vec2 noise_coords = gl_FragCoord.xy/128.0;
+	vec2 noise_coords = gl_FragCoord.xy/128.0;	// Coordenades de la textura de blue noise.
 
 	if (u_jittering_text) {
-		offset = texture2D(u_noise_txt, noise_coords).z;	
+		offset = texture2D(u_noise_txt, noise_coords).z;	// Llegim el valor de la textura a les coordenades calculades i agafem el tercer component
+															// perquè és blue noise.
 	} else if (u_jittering_rand) {
-		offset = rand(gl_FragCoord.xy);
+		offset = rand(gl_FragCoord.xy);						// Si seleccionem l'altre mètode, apliquem la funció prèviament definida
+
 	} else {
-		offset = 0;
+		offset = 0;											// Si cap de les dues està seleccionada, assignem offset = 0, que és equivalent a no
+															// aplicar Jittering
 	}
 
-	vec3 dir = normalize(v_position.xyz - u_camera_position.xyz);
-	vec3 sample_pos = v_position.xyz + offset*dir;
-	vec3 step_vec = dir*u_step_length;
+	vec3 dir = normalize(v_position.xyz - u_camera_position.xyz);	// Direcció del step vector normalitzada
 
-	vec4 final_color = vec4(0.0), sample_color;
+	vec3 sample_pos = v_position.xyz + offset*dir;			// Movem la primera sample position en base a l'offset (si l'offset és 0, no es mou)
+
+	vec3 step_vec = dir*u_step_length;						// Step vector és la direcció normalitzada per la longitud, seleccionada interactivament
+
+	vec4 final_color = vec4(0.0), sample_color;				// Inicialitzem alguns valors
 	float value;
-	for (int i = 0; i < 1000000; i++) {
 
-		if (u_clipping1 || u_clipping2) {
-			value = dot(u_clipping_plane.xyz, sample_pos.xyz) + u_clipping_plane.a;
-			if ((u_clipping1) && (value < 0 )) {
-				sample_pos += step_vec;
-				if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
-					break;
-				}
-				continue;
-			}
-			else if ((u_clipping2) && (value > 0 )) {
-				sample_pos += step_vec;
-				if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
-					break;
-				}
-				continue;
-			}
-		}
 
-		d = texture3D(u_texture, (sample_pos+1.0)/2.0).x;
-		if (d < u_threshold) {
-			if (u_transfer_bool) {
+	if (u_transfer_bool) {		// Posem la condició fora del loop per només comprovar-ho una vegada
+								// Representa si es fan servir les respectives transfer functions
+
+		for (int i = 0; i < 1000000; i++) {
+
+			if (u_clipping1 || u_clipping2) {				// Si algun dels modes de clipping està activat
+				value = dot(u_clipping_plane.xyz, sample_pos.xyz) + u_clipping_plane.a;	
+				if (((u_clipping1) && (value < 0 )) || ((u_clipping2) && (value > 0 ))) {		// Condicions per no representar aquestes posicions
+					sample_pos += step_vec;
+					if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {	// Comprovem aquí també si hem sortit del volum
+						break;
+					}
+					continue;
+				}
+			}
+
+			d = texture3D(u_texture, (sample_pos+1.0)/2.0).x;
+			
+			if (d < u_threshold) {		// Condició per estudiar els valors de d
+
 				sample_color = texture2D(u_transfer_function, vec2(d,1));
-			} else {
-				sample_color = vec4(d,d,d,d);
+
+				sample_color.rgb *= sample_color.a;
+
+				final_color += u_step_length*(1.0-final_color.a)*sample_color;
+
+				if (final_color.a >= 0.9) {
+					break;
+				}
 			}
 
-			sample_color.rgb *= sample_color.a;
+			sample_pos += step_vec;
 
-			final_color += u_step_length*(1.0-final_color.a)*sample_color;
-
-			if (final_color.a >= 0.9) {
+			if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
 				break;
 			}
 		}
-		sample_pos += step_vec;
-		if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
-			break;
+	} 
+	else {
+		for (int i = 0; i < 1000000; i++) {
+
+			if (u_clipping1 || u_clipping2) {				// Si algun dels modes de clipping està activat
+				value = dot(u_clipping_plane.xyz, sample_pos.xyz) + u_clipping_plane.a;	
+				if (((u_clipping1) && (value < 0 )) || ((u_clipping2) && (value > 0 ))) {		// Condicions per no representar aquestes posicions
+					sample_pos += step_vec;
+					if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {	// Comprovem aquí també si hem sortit del volum
+						break;
+					}
+					continue;
+				}
+			}
+
+			d = texture3D(u_texture, (sample_pos+1.0)/2.0).x;
+			
+			if (d < u_threshold) {
+
+				sample_color = vec4(d,d,d,d);	// Si no tenim transfer functions activades, el color ve donat pel valor de la densitat de la textura
+
+				sample_color.rgb *= sample_color.a;
+
+				final_color += u_step_length*(1.0-final_color.a)*sample_color;
+
+				if (final_color.a >= 0.9) {
+					break;
+				}
+			}
+
+			sample_pos += step_vec;
+
+			if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
+				break;
+			}
 		}
+
 	}
+	
 
 	if (final_color.a < 0.03) {
 		discard;

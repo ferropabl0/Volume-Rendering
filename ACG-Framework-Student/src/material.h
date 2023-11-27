@@ -46,7 +46,7 @@ class VolumeMaterial : public StandardMaterial
 public:
 	float step_length, brightness, d_threshold;
 	int jit_idx;
-	bool jit_text, jit_rand, clipping1, clipping2, transfer;
+	bool jit_text, jit_rand, clipping1, clipping2, transfer, two_transfers;
 	float clip_plane[4];
 	Texture* noise;
 	Texture* transfer_function;
@@ -59,10 +59,10 @@ public:
 
 };
 
-class IsosurfaceMaterial : public VolumeMaterial
+class IsosurfaceMaterial : public VolumeMaterial		// Subclass for isosurfaces
 {
 public:
-	float h;
+	float h;					
 	float light_pos[3];
 	IsosurfaceMaterial(Shader* shader_, Texture* texture_);
 	~IsosurfaceMaterial();
