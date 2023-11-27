@@ -5,13 +5,15 @@ uniform float u_step_length;
 uniform float u_brightness;
 uniform vec4 u_color;
 uniform sampler2D u_noise_txt;
-uniform sampler2D u_transfer_function;
+uniform sampler2D u_transfer_function1;
+uniform sampler2D u_transfer_function2;
 uniform bool u_jittering_text;
 uniform bool u_jittering_rand;
 uniform vec4 u_clipping_plane;
 uniform bool u_clipping1;
 uniform bool u_clipping2;
 uniform bool u_transfer_bool;
+uniform bool u_transfer_bool2;
 uniform float u_threshold;
 
 varying vec3 v_position;
@@ -70,7 +72,7 @@ void main() {
 			
 			if (d < u_threshold) {		// Condició per estudiar els valors de d
 
-				sample_color = texture2D(u_transfer_function, vec2(d,1));
+				sample_color = texture2D(u_transfer_function1, vec2(d,1));
 
 				sample_color.rgb *= sample_color.a;
 
@@ -88,7 +90,44 @@ void main() {
 			}
 		}
 	} 
-	else {
+	else if (u_transfer_bool2) {		// Condició per utilitzar la transfer function 2
+		
+		for (int i = 0; i < 1000000; i++) {
+
+			if (u_clipping1 || u_clipping2) {				// Si algun dels modes de clipping està activat
+				value = dot(u_clipping_plane.xyz, sample_pos.xyz) + u_clipping_plane.a;	
+				if (((u_clipping1) && (value < 0 )) || ((u_clipping2) && (value > 0 ))) {		// Condicions per no representar aquestes posicions
+					sample_pos += step_vec;
+					if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {	// Comprovem aquí també si hem sortit del volum
+						break;
+					}
+					continue;
+				}
+			}
+
+			d = texture3D(u_texture, (sample_pos+1.0)/2.0).x;
+			
+			if (d < u_threshold) {		// Condició per estudiar els valors de d
+
+				sample_color = texture2D(u_transfer_function2, vec2(d,1));
+
+				sample_color.rgb *= sample_color.a;
+
+				final_color += u_step_length*(1.0-final_color.a)*sample_color;
+
+				if (final_color.a >= 0.9) {
+					break;
+				}
+			}
+
+			sample_pos += step_vec;
+
+			if ((abs(sample_pos.x)>1.0) || (abs(sample_pos.y)>1.0) || (abs(sample_pos.z)>1.0)) {
+				break;
+			}
+		}
+	}
+	else {			// Sense transfer function
 		for (int i = 0; i < 1000000; i++) {
 
 			if (u_clipping1 || u_clipping2) {				// Si algun dels modes de clipping està activat

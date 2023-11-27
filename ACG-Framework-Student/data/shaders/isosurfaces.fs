@@ -37,7 +37,7 @@ void main() {
 
         sample_color.rgb *= sample_color.a;
 
-		if ((sample_color.a >= u_threshold)  || (sample_color.a >= 0.9)) {
+		if ((sample_color.a >= u_threshold)  && (sample_color.a <= 1.0)) {
 
 			x_pos1 = vec3(sample_pos.x+u_h, sample_pos.y, sample_pos.z);
 			x_pos2 = vec3(sample_pos.x-u_h, sample_pos.y, sample_pos.z);

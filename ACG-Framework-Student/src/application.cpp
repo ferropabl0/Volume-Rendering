@@ -115,17 +115,25 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* abdomen_t1 = new Texture();
 		abdomen_t1->load("data/images/abdomen_t1.png", true, GL_CLAMP_TO_EDGE);
 
+		Texture* abdomen_t2 = new Texture();
+		abdomen_t2->load("data/images/abdomen_t2.png", true, GL_CLAMP_TO_EDGE);
 
-		Texture* transfers[6];
+		Texture* orange_t1 = new Texture();
+		orange_t1->load("data/images/orange_t1.png", true, GL_CLAMP_TO_EDGE);
+
+		Texture* daisy_t1 = new Texture();
+		daisy_t1->load("data/images/daisy_t1.png", true, GL_CLAMP_TO_EDGE);
+
+		Texture* transfers[7];
 		transfers[0] = foot_t1;
 		transfers[1] = bonsai_t1;
 		transfers[2] = teapot_t1;
 		transfers[3] = abdomen_t1;
+		transfers[4] = orange_t1;
+		transfers[5] = daisy_t1;
+		transfers[6] = abdomen_t2;
 
-		// ISOSURFACE ON-OFF
-		bool isosurface = false;
-
-		VolumeNode* node1 = new VolumeNode(shaders, textures, models, blue_noise_text, transfers, aux_mesh, isosurface);
+		VolumeNode* node1 = new VolumeNode(shaders, textures, models, blue_noise_text, transfers, aux_mesh);
 		node_list.push_back(node1);
 	
 	}

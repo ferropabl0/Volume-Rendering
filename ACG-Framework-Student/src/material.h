@@ -45,13 +45,15 @@ class VolumeMaterial : public StandardMaterial
 {
 public:
 	float step_length, brightness, d_threshold;
-	int jit_idx;
-	bool jit_text, jit_rand, clipping1, clipping2, transfer, two_transfers;
-	float clip_plane[4];
-	Texture* noise;
-	Texture* transfer_function;
+	int jit_idx;	// To know the Jittering Mode
+	bool jit_text, jit_rand, clipping1, clipping2, transfer, two_transfers, transfer2;		// Boolean values for different types of jittering, clipping or transfer functions
+	float clip_plane[4];	// Coordinates of the clipping plane
+	Texture* noise;			// Noise texture
+	Texture* transfer_function[2];		// Two transfer functions. In our implementation, the second one will only be used for abdomen.
+										// Even though this is probably not the optimal approach, it is the one we could think of for
+										// implementing textures with 1 and textures with 2 transfer functions.
 	VolumeMaterial();
-	VolumeMaterial(Shader* shader_, Texture* texture_, Texture* noise_, Texture* transfer_function_);
+	VolumeMaterial(Shader* shader_, Texture* texture_, Texture* noise_, Texture* transfer_function_, bool two_trans, Texture* transfer_function2);
 	~VolumeMaterial();
 	void setUniforms(Camera* camera, Matrix44 model);
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
@@ -62,8 +64,8 @@ public:
 class IsosurfaceMaterial : public VolumeMaterial		// Subclass for isosurfaces
 {
 public:
-	float h;					
-	float light_pos[3];
+	float h;					// h value of the formula
+	float light_pos[3];			// Light position
 	IsosurfaceMaterial(Shader* shader_, Texture* texture_);
 	~IsosurfaceMaterial();
 	void setUniforms(Camera* camera, Matrix44 model);

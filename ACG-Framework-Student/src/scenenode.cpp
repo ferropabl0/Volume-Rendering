@@ -57,22 +57,26 @@ void SceneNode::renderInMenu()
 	}
 }
 
-VolumeNode::VolumeNode(Shader* shader[2], Texture* texts_[6], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[6], Mesh* aux_mesh_, bool isosurf)
+VolumeNode::VolumeNode(Shader* shader[2], Texture* texts_[7], Matrix44 mods_[6], Texture* noise_, Texture* transfers_[6], Mesh* aux_mesh_)
 {
 	mesh = aux_mesh_;
-	index = 1;
-	if (isosurf) {
-		for (int i = 0; i < 6; i++) {
-			mats[i] = new IsosurfaceMaterial(shader[1], texts_[i]);
-			mods[i] = mods_[i];
+	index = 0;
+	isosurf = false;
+
+	for (int i = 0; i < 6; i++) {
+		if (i == 3) {		// We have two transfer functions for the abdomen, which we know is index 3
+			mats[i] = new VolumeMaterial(shader[0], texts_[i], noise_, transfers_[i], true, transfers_[6]);
 		}
-	}
-	else {
-		for (int i = 0; i < 6; i++) {
-			mats[i] = new VolumeMaterial(shader[0], texts_[i], noise_, transfers_[3]);
-			mods[i] = mods_[i];
+		else {
+			mats[i] = new VolumeMaterial(shader[0], texts_[i], noise_, transfers_[i], false, NULL);
 		}
+		mods[i] = mods_[i];
+
 	}
+	for (int i = 6; i < 12; i++) {	// We store 12 different materials, the first 6 as VolumeMaterials, and the other 6 as IsosurfaceMaterial
+		mats[i] = new IsosurfaceMaterial(shader[1], texts_[i-6]);
+	}
+
 	
 	material = mats[index];
 	model = mods[index];
@@ -100,8 +104,16 @@ void VolumeNode::renderInMenu()
 			material = mats[index];
 			model = mods[index];
 		}
+		ImGui::Checkbox("Isosurface", &isosurf);
+		if (isosurf) {
+			material = mats[index+6];		// The material is the same, but as an IsosurfaceMaterial
+		}
+		else {
+			material = mats[index];
+		}
 
 		material->renderInMenu();
 		ImGui::TreePop();
 	}
+
 }

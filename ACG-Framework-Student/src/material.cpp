@@ -92,7 +92,8 @@ VolumeMaterial::VolumeMaterial() {
 	jit_text = false;
 	noise = NULL;
 	transfer = false;
-	transfer_function = NULL;
+	transfer_function[0] = NULL;
+	transfer_function[1] = NULL;
 	clipping1 = false;
 	clipping2 = false;
 	clip_plane[0] = 0.0;
@@ -100,9 +101,12 @@ VolumeMaterial::VolumeMaterial() {
 	clip_plane[2] = 0.0;
 	clip_plane[3] = 0.0;
 	d_threshold = 1.01;
+	two_transfers = false;
+	transfer2 = false;
 }
-VolumeMaterial::VolumeMaterial(Shader* shader_, Texture* texture_, Texture* noise_, Texture* transfer_function_) {
+VolumeMaterial::VolumeMaterial(Shader* shader_, Texture* texture_, Texture* noise_, Texture* transfer_function_, bool two_trans, Texture* transfer_function2) {
 
+	// INIT
 	color = vec4(1.f, 1.f, 1.f, 1.f);
 	step_length = 0.02;
 	brightness = 10.0;
@@ -113,7 +117,8 @@ VolumeMaterial::VolumeMaterial(Shader* shader_, Texture* texture_, Texture* nois
 	jit_text = false;
 	noise = noise_;
 	transfer = false;
-	transfer_function = transfer_function_;
+	transfer_function[0] = transfer_function_;
+	transfer_function[1] = transfer_function2;
 	clipping1 = false;
 	clipping2 = false;
 	clip_plane[0] = 0.0;
@@ -121,6 +126,8 @@ VolumeMaterial::VolumeMaterial(Shader* shader_, Texture* texture_, Texture* nois
 	clip_plane[2] = 0.0;
 	clip_plane[3] = 0.0;
 	d_threshold = 1.01;
+	two_transfers = two_trans;	// bool in case there are two transfer functions
+	transfer2 = false;	// bool for the second transfer active
 
 }
 
@@ -143,12 +150,16 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_noise_txt", noise);
 	shader->setUniform("u_jittering_text", jit_text);
 	shader->setUniform("u_jittering_rand", jit_rand);
-	shader->setUniform("u_transfer_function", transfer_function);
+	if (transfer_function[1]) {			// We only send the second transfer function if it is not null
+		shader->setUniform("u_transfer_function2", transfer_function[1]);
+	}
+	shader->setUniform("u_transfer_function1", transfer_function[0]);
 	shader->setUniform("u_clipping1", clipping1);
 	shader->setUniform("u_clipping2", clipping2);
-	vec4 clipping_plane = vec4(clip_plane[0], clip_plane[1], clip_plane[2], clip_plane[3]);
+	vec4 clipping_plane = vec4(clip_plane[0], clip_plane[1], clip_plane[2], clip_plane[3]);	// We need to convert the plane to send it as a uniform
 	shader->setUniform("u_clipping_plane", clipping_plane);
 	shader->setUniform("u_transfer_bool", transfer);
+	shader->setUniform("u_transfer_bool2", transfer2);
 	shader->setUniform("u_threshold", d_threshold);
 
 
@@ -185,8 +196,8 @@ void VolumeMaterial::renderInMenu()
 	ImGui::SliderFloat("Brightness", &brightness, 0.0, 50.0);
 	ImGui::SliderFloat("Density threshold", &d_threshold, 0.01, 1.01);
 	if (ImGui::Combo("Jittering Mode", &jit_idx, "No jittering\0Jittering with texture\0Jittering with function\0")) {
-		if (jit_idx == 0) {
-			jit_rand = false;
+		if (jit_idx == 0) {				// Choosing the jittering mode
+			jit_rand = false;			// When one is activated, the other should be deactivated
 			jit_text = false;
 		}
 		else if (jit_idx == 1) {
@@ -199,7 +210,7 @@ void VolumeMaterial::renderInMenu()
 		}
 	}
 	
-	ImGui::Checkbox("Clipping", &clipping1);
+	ImGui::Checkbox("Clipping", &clipping1);		// We implemented two clipping modes, since the plane intersecting with the object creates two parts
 	if (clipping1) {
 		clipping2 = false;
 	}
@@ -208,8 +219,17 @@ void VolumeMaterial::renderInMenu()
 	if (clipping2) {
 		clipping1 = false;
 	}
-	ImGui::SliderFloat4("Clippling plane", clip_plane, -20.0, 20.0);
-	ImGui::Checkbox("Transfer function", &transfer);
+	ImGui::SliderFloat4("Clippling plane", clip_plane, -20.0, 20.0);	// Coordinates
+	ImGui::Checkbox("Transfer function", &transfer);					// Transfer function
+	if (two_transfers) {
+		if (transfer) {
+			transfer2 = false;
+		}
+		ImGui::Checkbox("Transfer function 2", &transfer2);		// Only showing for the materials that have two transfer functions (abdomen)
+		if (transfer2) {
+			transfer = false;
+		}
+	}
 }
 
 
@@ -217,7 +237,7 @@ void VolumeMaterial::renderInMenu()
 
 
 IsosurfaceMaterial::IsosurfaceMaterial(Shader* shader_, Texture* texture_) {
-
+	// INIT
 	color = vec4(1.f, 1.f, 1.f, 1.f);
 	step_length = 0.02;
 	brightness = 10.0;
@@ -247,7 +267,7 @@ void IsosurfaceMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_step_length", step_length);
 	shader->setUniform("u_brightness", brightness);
 	shader->setUniform("u_threshold", d_threshold);
-	vec3 u_light_pos = vec3(light_pos[0], light_pos[1], light_pos[2]);
+	vec3 u_light_pos = vec3(light_pos[0], light_pos[1], light_pos[2]);	// Needs to be converted
 	shader->setUniform("u_light_pos", u_light_pos);
 	shader->setUniform("u_h", h);
 	if (texture) {
@@ -261,6 +281,7 @@ void IsosurfaceMaterial::renderInMenu()
 	ImGui::SliderFloat("Step Length", &step_length, 0.01, 0.2);
 	ImGui::SliderFloat("Brightness", &brightness, 0.0, 50.0);
 	ImGui::SliderFloat("Density threshold", &d_threshold, 0.01, 1.01);
+	ImGui::SliderFloat("h value", &h, 0.001, 1);
 	ImGui::DragFloat3("Light position", light_pos, 0.1f);
 
 }
