@@ -39,16 +39,16 @@ void main() {
 
 		if ((sample_color.a >= u_threshold)  && (sample_color.a <= 1.0)) {
 
-			x_pos1 = vec3(sample_pos.x+u_h, sample_pos.y, sample_pos.z);
-			x_pos2 = vec3(sample_pos.x-u_h, sample_pos.y, sample_pos.z);
-			y_pos1 = vec3(sample_pos.x, sample_pos.y+u_h, sample_pos.z);
-			y_pos2 = vec3(sample_pos.x, sample_pos.y-u_h, sample_pos.z);
-			z_pos1 = vec3(sample_pos.x, sample_pos.y, sample_pos.z+u_h);
-			z_pos2 = vec3(sample_pos.x, sample_pos.y, sample_pos.z-u_h);
+			x_pos1 = vec3(sample_pos.x+u_h, sample_pos.y, sample_pos.z);	// (x+h,y,z)
+			x_pos2 = vec3(sample_pos.x-u_h, sample_pos.y, sample_pos.z);	// (x-h,y,z)
+			y_pos1 = vec3(sample_pos.x, sample_pos.y+u_h, sample_pos.z);	// (x,y+h,z)
+			y_pos2 = vec3(sample_pos.x, sample_pos.y-u_h, sample_pos.z);	// (x,y-h,z)
+			z_pos1 = vec3(sample_pos.x, sample_pos.y, sample_pos.z+u_h);	// (x,y,z+h)
+			z_pos2 = vec3(sample_pos.x, sample_pos.y, sample_pos.z-u_h);	// (x,y,z-h)
 
-			grad_x = texture3D(u_texture, (x_pos1+1.0)/2.0).x - texture3D(u_texture, (x_pos2+1.0)/2.0).x;
-			grad_y = texture3D(u_texture, (y_pos1+1.0)/2.0).x - texture3D(u_texture, (y_pos2+1.0)/2.0).x;
-			grad_z = texture3D(u_texture, (z_pos1+1.0)/2.0).x - texture3D(u_texture, (z_pos2+1.0)/2.0).x;
+			grad_x = texture3D(u_texture, (x_pos1+1.0)/2.0).x - texture3D(u_texture, (x_pos2+1.0)/2.0).x;	// f(x+h,y,z) - f(x-h,y,z)
+			grad_y = texture3D(u_texture, (y_pos1+1.0)/2.0).x - texture3D(u_texture, (y_pos2+1.0)/2.0).x;	// f(x,y+h,z) - (x,y-h,z)
+			grad_z = texture3D(u_texture, (z_pos1+1.0)/2.0).x - texture3D(u_texture, (z_pos2+1.0)/2.0).x;	// f(x,y,z+h) - f(x,y,z-h)
 
 			gradient = vec3(grad_x,grad_y,grad_z)/(2*u_h);
 			normal = -normalize(gradient);
@@ -56,6 +56,9 @@ void main() {
 			view_dir = -dir;
 			refl = 2*dot(normal,light_dir)*normal - light_dir;
 			final_color = vec4(sample_color.xyz*(dot(light_dir,normal)+pow(dot(refl,view_dir),10.0)),1.0);
+			break;
+		}
+		else if (sample_color.a >= 1.0) {
 			break;
 		}
 
