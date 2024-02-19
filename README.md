@@ -1,0 +1,1 @@
+This repository contains the Volume Rendering lab projects done by Naiara Garmendia and Pablo Fernández for the Advanced Computer Graphics course, 2023-2024. The final result can be seen by executing visualstudio2015.sln.
